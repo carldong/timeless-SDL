@@ -39,12 +39,12 @@ data Button m = Button
                              String -- ^ Button label
                           -> Bool -- ^ If button is pressed
                           -> m () -- ^ Render Action
-              , btnParse :: (Bool,Bool) -- ^ Previously (pressed,focused) or not
-                         -> UIInput -- ^ Input from UI
-                         -> (Bool,Bool) -- ^ If button is (pressed,focused)
+              , btnParse :: Bool -- ^ Previously pressed or not
+                         -> (Bool, UIInput) -- ^ (Focused, Input)
+                         -> Bool -- ^ If button is pressed
               , btnStream :: Bool -- ^ If button is pressed
-                          -> UIInput -- ^ In-input stream
-                          -> UIInput -- ^ Out-input stream
+                          -> (Bool, UIInput) -- ^ (Focused, Input)
+                          -> UIInput -- ^ Manipulated input
               }
 instance Monad m => Component (Button m) m (String,Bool) Bool where
   -- | Renders input string as button label, checks if focused from
@@ -54,9 +54,31 @@ instance Monad m => Component (Button m) m (String,Bool) Bool where
         parser = btnParse b
         stream = btnStream b
     in proc (i, (lbl,focused)) -> do
-      (pressed, _) <- mkSW_ (False,False) parser -< i
-      i' <- arr (uncurry stream) -< (pressed, i)
+      pressed <- mkSW_ False parser -< (focused, i)
+      i' <- arr (uncurry stream) -< (pressed, (focused, i))
       mkKleisli_ $ uncurry renderer -< (lbl, pressed)
       returnA -< (i', pressed)
 
-
+data TextField m = TextField
+                   {
+                     tfRender :: Monad m =>
+                                 String -- ^ Content
+                              -> Bool -- ^ Focused or not
+                              -> m ()
+                   , tfParse :: String -- ^ Previouis Content
+                             -> (Bool, UIInput) -- ^ (Focused, input)
+                             -> String
+                   , tfStream :: String -- ^ Content
+                              -> (Bool, UIInput) -- ^ (Focused, Input)n
+                              -> UIInput
+                   }
+instance Monad m => Component (TextField m) m (String,Bool) String where
+  componentBox tf =
+    let renderer = tfRender tf
+        parser = tfParse tf
+        stream = tfStream tf
+    in proc (i, (txt,focused)) -> do
+      txt' <- mkSW_ "" parser -< (focused, i)
+      i' <- arr (uncurry stream) -< (txt', (focused, i))
+      mkKleisli_ $ uncurry renderer -< (txt', focused)
+      returnA -< (i', txt')
