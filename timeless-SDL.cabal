@@ -16,7 +16,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     FRP.Timeless.Framework.SDL
-  -- other-modules:
+  other-modules: FRP.Timeless.Framework.UI.Scene
+               , FRP.Timeless.Framework.UI.Components
   build-depends:       base >= 4.7 && < 5
                      , timeless
                      , sdl2 >= 2.0.0
@@ -27,7 +28,7 @@ library
                      Arrows
                      TypeSynonymInstances
                      FlexibleInstances
-                     ExistentialQuantification
+                     RankNTypes
 
 executable app
   hs-source-dirs:      app

@@ -1,5 +1,5 @@
-{-|
-Module:     FRP.Timeless.Framesork.SDL
+{-| 
+Module:     FRP.Timeless.Framework.SDL
 Copyright:  (c) 2015 Rongcui Dong
 
 License:    BSD3
@@ -10,7 +10,11 @@ module FRP.Timeless.Framework.SDL
     where
 
 import Prelude hiding ((.), id)
+
 import FRP.Timeless
+import FRP.Timeless.Framework.UI.Scene
+import FRP.Timeless.Framework.UI.Components
+
 import qualified SDL as SDL
 import SDL (($=))
 import Linear
