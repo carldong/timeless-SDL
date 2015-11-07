@@ -30,7 +30,7 @@ library
                      TypeSynonymInstances
                      FlexibleInstances
                      RankNTypes
-                     UnicodeSyntax
+                     MultiParamTypeClasses
 
 executable app
   hs-source-dirs:      app
