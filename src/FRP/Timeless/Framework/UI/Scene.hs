@@ -10,5 +10,8 @@ module FRP.Timeless.Framework.UI.Scene
        where
 
 import FRP.Timeless
+import FRP.Timeless.Framework.UI.Events
 
-newtype Scene = Scene {sceneBox :: Monad m => Signal s m UIInput ()}
+newtype Scene = Scene {
+  sceneBox :: forall m s. Monad m => Signal s m UIInput ()
+  }

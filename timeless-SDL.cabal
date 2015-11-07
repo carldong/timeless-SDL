@@ -18,6 +18,7 @@ library
   exposed-modules:     FRP.Timeless.Framework.SDL
   other-modules: FRP.Timeless.Framework.UI.Scene
                , FRP.Timeless.Framework.UI.Components
+               , FRP.Timeless.Framework.UI.Events
   build-depends:       base >= 4.7 && < 5
                      , timeless
                      , sdl2 >= 2.0.0
@@ -29,6 +30,7 @@ library
                      TypeSynonymInstances
                      FlexibleInstances
                      RankNTypes
+                     UnicodeSyntax
 
 executable app
   hs-source-dirs:      app
