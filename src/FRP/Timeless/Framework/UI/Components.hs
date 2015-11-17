@@ -9,25 +9,25 @@ Maintainer: Rongcui Dong <karl_1702@188.com>
 module FRP.Timeless.Framework.UI.Components
        where
 
+import Prelude hiding ((.), id)
+
 import Control.Monad.Fix
 
 import FRP.Timeless
 import FRP.Timeless.Framework.UI.Events
 
 newtype Container = Container {
-  containerBox :: forall m s. Monad m => Signal s m UIInput UIInput
-  }
+    containerBox :: forall m s. Monad m => Signal s m UIInput UIInput
+    }
 
-class Component c m a b where
-  componentBox :: forall s.
-                  c -> Signal s m (UIInput, a) (UIInput, b)
+newtype Monad m => Component s m a b = Component {
+    componentBox :: Signal s m (UIInput, a) (UIInput, b)
+    }
 
-data Label = Label {renderLabel :: forall m. Monad m => String -> m ()}
-instance Monad m => Component Label m String () where
-  -- | Just renders the string, and passes input transparently
-  componentBox l =
-    let renderer = renderLabel l in
-    second (mkKleisli_ renderer)
+instance Monad m => Category (Component s m) where
+    id = Component SId
+    c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+
 
 data Button m = Button
               {
@@ -42,18 +42,9 @@ data Button m = Button
                           -> (Bool, UIInput) -- ^ (Focused, Input)
                           -> UIInput -- ^ Manipulated input
               }
-instance Monad m => Component (Button m) m (String,Bool) Bool where
-  -- | Renders input string as button label, checks if focused from
-  -- input Bool, outputs whether button is pressed
-  componentBox b =
-    let renderer = btnRender b
-        parser = btnParse b
-        stream = btnStream b
-    in proc (i, (lbl,focused)) -> do
-      pressed <- mkSW_ False parser -< (focused, i)
-      i' <- arr (uncurry stream) -< (pressed, (focused, i))
-      mkKleisli_ $ uncurry renderer -< (lbl, pressed)
-      returnA -< (i', pressed)
+
+mkBtn :: Monad m => Button m -> Component s m a b
+mkBtn = undefined
 
 data TextField m = TextField
                    {
@@ -68,13 +59,7 @@ data TextField m = TextField
                               -> (Bool, UIInput) -- ^ (Focused, Input)n
                               -> UIInput
                    }
-instance Monad m => Component (TextField m) m (String,Bool) String where
-  componentBox tf =
-    let renderer = tfRender tf
-        parser = tfParse tf
-        stream = tfStream tf
-    in proc (i, (txt,focused)) -> do
-      txt' <- mkSW_ "" parser -< (focused, i)
-      i' <- arr (uncurry stream) -< (txt', (focused, i))
-      mkKleisli_ $ uncurry renderer -< (txt', focused)
-      returnA -< (i', txt')
+
+mkTF :: Monad m => TextField m -> Component s m a b
+mkTF = undefined
+
