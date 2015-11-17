@@ -16,12 +16,11 @@ import Control.Monad.Fix
 import FRP.Timeless
 import FRP.Timeless.Framework.UI.Events
 
-{- | A Container is just a 'Signal' that takes UI input and streams it
-   through performing side effects.
-
-  * Input: UIInput
-  * Output: UIInput to be passed
--}
+{-| A Container is just a 'Signal' that takes UI input and streams it
+ through performing side effects.
+ * Input: UIInput
+ * Output: UIInput to be passed
+ -}
 newtype Container = Container {
     containerBox :: forall m s. Monad m => Signal s m UIInput UIInput
     }
@@ -82,14 +81,14 @@ mkBtn b =
         mkKleisli_ (uncurry renderer) -< (lbl, pressed)
         returnA -< (input', pressed)
 
- {-| A TextField is a 'Component' which changes contents according to an
-  - input string, updates according to UI input when this input is
-  - inhibited and the textfield itself isfocused, and outputs the current
-  - content
+{-| A TextField is a 'Component' which changes contents according to an
+ - input string, updates according to UI input when this input is
+ - inhibited and the textfield itself isfocused, and outputs the current
+ - content
 
-  * Input: (Forced Content, Focused)
-  * Output: (Content)
-  -}
+ * Input: (Forced Content, Focused)
+ * Output: (Content)
+ -}
 data TextField m = TextField
                    {
                      tfRender :: Monad m =>
