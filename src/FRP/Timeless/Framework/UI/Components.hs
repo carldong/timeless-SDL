@@ -18,10 +18,6 @@ newtype Container = Container {
   containerBox :: forall m s. Monad m => Signal s m UIInput UIInput
   }
 
--- newtype Component a b = Component {
---   componentBox :: forall m s. Monad m => Signal s m (UIInput,a) (UIInput,b)
---   }
-
 class Component c m a b where
   componentBox :: forall s.
                   c -> Signal s m (UIInput, a) (UIInput, b)
