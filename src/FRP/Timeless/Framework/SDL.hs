@@ -1,4 +1,4 @@
-{-| 
+{-|
 Module:     FRP.Timeless.Framework.SDL
 Copyright:  (c) 2015 Rongcui Dong
 
@@ -36,5 +36,4 @@ testApp :: IO ()
 testApp = do
   box <- initApp
   runBox fwSession box
-  
 
