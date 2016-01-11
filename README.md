@@ -23,3 +23,9 @@ is intended to be discarded after I gain knowledge. Unless it turns
 out to be wayyyy too good to be thrown away, I will stop maintaining
 it after I finish experimenting with things, or when I no longer have
 the need to write anything using Timeless.
+
+# Note to self
+
+Unless I completely rewrite that SDL2-ttf, I am no going to add font
+support
+right now.

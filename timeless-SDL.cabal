@@ -17,6 +17,8 @@ library
   hs-source-dirs:      src
   exposed-modules:     FRP.Timeless.Framework.SDL
                      , FRP.Timeless.Framework.SDL.Components
+                     , FRP.Timeless.Framework.Debug
+                     , FRP.Timeless.Framework.SDL.Utils
   other-modules: FRP.Timeless.Framework.UI.Scene
                , FRP.Timeless.Framework.UI.Components
                , FRP.Timeless.Framework.UI.Events

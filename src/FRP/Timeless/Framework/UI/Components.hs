@@ -32,10 +32,15 @@ newtype Monad m => Component s m a b = Component {
     componentBox :: Signal s m (UIInput, a) (UIInput, b)
     }
 
--- | This makes threading 'Component's less verbose
+---- | This makes threading 'Component's less verbose
 instance Monad m => Category (Component s m) where
-    id = Component SId
-    c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+  id = Component SId
+  c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+
+-- NOTE: Component is probably NOT an Arrow.
+-- instance Monad m => Arrow (Component s m) where
+--   arr = Component . arr . second
+--   first f =
 
 -- | A Label is a 'Component' which renders a 'String'
 newtype Label m = Label {
