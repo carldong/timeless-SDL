@@ -16,13 +16,19 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     FRP.Timeless.Framework.SDL
+                     , FRP.Timeless.Framework.SDL.Components
+                     , FRP.Timeless.Framework.Debug
+                     , FRP.Timeless.Framework.SDL.Utils
   other-modules: FRP.Timeless.Framework.UI.Scene
                , FRP.Timeless.Framework.UI.Components
                , FRP.Timeless.Framework.UI.Events
   build-depends:       base >= 4.7 && < 5
                      , timeless
                      , sdl2 >= 2.0.0
+                     , sdl2-ttf
                      , linear
+                     , transformers
+                     , mtl
   default-language:    Haskell2010
   default-extensions:
                      OverloadedStrings

@@ -1,4 +1,4 @@
-{-| 
+{-|
 Module:     FRP.Timeless.Framework.SDL
 Copyright:  (c) 2015 Rongcui Dong
 
@@ -16,6 +16,7 @@ import FRP.Timeless.Framework.UI.Scene
 import FRP.Timeless.Framework.UI.Components
 
 import qualified SDL as SDL
+import qualified Graphics.UI.SDL.TTF as TTF
 import SDL (($=))
 import Linear
 
@@ -33,8 +34,7 @@ initApp = do
   return $ testFWBox renderer
 
 testApp :: IO ()
-testApp = do
+testApp = TTF.withInit $ do
   box <- initApp
   runBox fwSession box
-  
 

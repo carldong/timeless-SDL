@@ -32,10 +32,15 @@ newtype Monad m => Component s m a b = Component {
     componentBox :: Signal s m (UIInput, a) (UIInput, b)
     }
 
--- | This makes threading 'Component's less verbose
+---- | This makes threading 'Component's less verbose
 instance Monad m => Category (Component s m) where
-    id = Component SId
-    c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+  id = Component SId
+  c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+
+-- NOTE: Component is probably NOT an Arrow.
+-- instance Monad m => Arrow (Component s m) where
+--   arr = Component . arr . second
+--   first f =
 
 -- | A Label is a 'Component' which renders a 'String'
 newtype Label m = Label {
@@ -57,16 +62,12 @@ mkLbl l =
  -}
 data Button m = Button
               {
-                btnRender :: Monad m =>
-                             String -- ^ Button label
-                          -> Bool -- ^ If button is pressed
-                          -> m () -- ^ Render Action
-              , btnParse :: Bool -- ^ Previously pressed or not
-                         -> (Bool, UIInput) -- ^ (Focused, Input)
-                         -> Bool -- ^ If button is pressed
-              , btnStream :: Bool -- ^ If button is pressed
-                          -> (Bool, UIInput) -- ^ (Focused, Input)
-                          -> UIInput -- ^ Manipulated input
+                -- | Label -> (Focused, Pressed) -> Render
+                btnRender :: Monad m => String -> (Bool, Bool) -> m ()
+                -- | Pressed -> (Focused, input) -> Pressed'
+              , btnParse :: Bool -> (Bool, UIInput) -> Bool
+                -- | Input -> (Focused, Pressed) -> Input'
+              , btnStream :: UIInput -> (Bool, Bool) -> UIInput
               }
 
 -- | Create a 'Component' from a 'Button'
@@ -77,42 +78,37 @@ mkBtn b =
         stream = btnStream b
     in Component $ proc (input, (lbl, focused)) -> do
         pressed <- mkSW_ False parser -< (focused, input)
-        input' <- arr (uncurry stream) -< (pressed, (focused, input))
-        mkKleisli_ (uncurry renderer) -< (lbl, pressed)
+        input' <- arr (uncurry stream) -< (input, (focused, pressed))
+        mkKleisli_ (uncurry renderer) -< (lbl, (focused, pressed))
         returnA -< (input', pressed)
 
-{-| A TextField is a 'Component' which changes contents according to an
- - input string, updates according to UI input when this input is
- - inhibited and the textfield itself isfocused, and outputs the current
- - content
-
- * Input: (Forced Content, Focused)
- * Output: (Content)
- -}
-data TextField m = TextField
-                   {
-                     tfRender :: Monad m =>
-                                 String -- ^ Content
-                              -> Bool -- ^ Focused or not
-                              -> m ()
-                   , tfParse :: String -- ^ Previouis Content
-                             -> (Bool, UIInput) -- ^ (Focused, input)
-                             -> String
-                   , tfStream :: String -- ^ Content
-                              -> (Bool, UIInput) -- ^ (Focused, Input)
-                              -> UIInput
-                   }
-
-{-| Creates a 'Component' from a 'TextField'
- -}
-mkTF :: Monad m => TextField m -> Component s m (String, Bool) String
-mkTF tf =
-    let renderer = tfRender tf
-        parser = tfParse tf
-        stream = tfStream tf
-    in Component $ proc (input, (txt, focused)) -> do
-        txt' <- mkSW_ "" parser -< (focused, input)
-        input' <- arr (uncurry stream) -< (txt', (focused, input))
-        mkKleisli_ (uncurry renderer) -< (txt', focused)
-        returnA -< (input', txt')
-
+--{-| A TextField is a 'Component' which changes contents according to an
+-- - input string, updates according to UI input when this input is
+-- - inhibited and the textfield itself isfocused, and outputs the current
+-- - content
+--
+-- * Input: (Forced Content, Focused)
+-- * Output: (Content)
+-- -}
+--data TextField m = TextField
+--                   {
+--                     -- | Content -> Focused -> Render
+--                     tfRender :: Monad m => String -> Bool -> m ()
+--                     -- | Fixme: Forgot inhibition here
+--                   , tfParse :: String -> (Bool, UIInput) -> String
+--                   , tfStream :: String -> (Bool, UIInput) -> UIInput
+--                   }
+--
+--{-| Creates a 'Component' from a 'TextField'
+-- -}
+--mkTF :: Monad m => TextField m -> Component s m (String, Bool) String
+--mkTF tf =
+--    let renderer = tfRender tf
+--        parser = tfParse tf
+--        stream = tfStream tf
+--    in Component $ proc (input, (txt, focused)) -> do
+--        txt' <- mkSW_ "" parser -< (focused, input)
+--        input' <- arr (uncurry stream) -< (txt', (focused, input))
+--        mkKleisli_ (uncurry renderer) -< (txt', focused)
+--        returnA -< (input', txt')
+--
