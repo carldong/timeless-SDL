@@ -7,11 +7,12 @@ resolver: lts-4.1
 packages:
 - '.'
 - ../timeless
+- ../sdl2-ttf
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: 
   #- sdl2-2.1.1
-- sdl2-ttf-0.2.2
+  #- sdl2-ttf-0.2.2
 
 # Override default flag values for local packages and extra-deps
 flags: {}
