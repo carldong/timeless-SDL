@@ -13,6 +13,8 @@ import Prelude hiding ((.), id)
 
 import Control.Monad.Fix
 
+import Linear.V2
+
 import FRP.Timeless
 import FRP.Timeless.Framework.UI.Events
 
@@ -21,8 +23,8 @@ import FRP.Timeless.Framework.UI.Events
  * Input: UIInput
  * Output: UIInput to be passed
  -}
-newtype Container = Container {
-    containerBox :: forall m s. Monad m => Signal s m UIInput UIInput
+newtype Monad m => Container m = Container {
+    containerBox :: forall s. Monad m => Signal s m UIInput UIInput
     }
 
 {-| A Component is a 'Signal' that takes in some UI input, streams it,
@@ -32,55 +34,75 @@ newtype Monad m => Component s m a b = Component {
     componentBox :: Signal s m (UIInput, a) (UIInput, b)
     }
 
----- | This makes threading 'Component's less verbose
+-- | This makes threading 'Component's less verbose
 instance Monad m => Category (Component s m) where
   id = Component SId
   c2 . c1 = Component $ (componentBox c2) . (componentBox c1)
+
+-- | A 'Renderable' is a rendering function
+newtype Monad m => Renderable m a = Renderable {
+  execRenderable :: a -> m ()
+  }
 
 -- NOTE: Component is probably NOT an Arrow.
 -- instance Monad m => Arrow (Component s m) where
 --   arr = Component . arr . second
 --   first f =
 
--- | A Label is a 'Component' which renders a 'String'
-newtype Label m = Label {
-    lblRender :: Monad m => String -> m ()
-    }
+-- | A basic data structure for arbitrary image data input
+data ImgInput a = ImgInput {
+    imgData :: a
+  , imgPos  :: V2 Integer
+  }
 
--- | Create a 'Component' from a 'Label'
-mkLbl :: Monad m => Label m -> Component s m String ()
-mkLbl l =
-  let renderer = lblRender l
-   in Component $ second $ mkKleisli_ renderer
+-- | An 'Image' renders an image
+type Image m a = Renderable m (ImgInput a)
+-- | The 'Image' 'Component'
+type ImageComponent s m a = Component s m (ImgInput a) ()
 
-{-| A Button is a stateful 'Component' which renders a label, checks
- - whether it is focused, and outputs a 'Bool' indicating whether it is
- - currently pressed
+-- | Creates an 'Image' 'Component' for a framework
+mkImgC :: (Monad m) => Image m a -> ImageComponent s m a
+mkImgC img = Component $ second . mkKleisli_ $ execRenderable img
 
- * Input: (Label, Focused)
- * Output: (IsPressed)
- -}
-data Button m = Button
-              {
-                -- | Label -> (Focused, Pressed) -> Render
-                btnRender :: Monad m => String -> (Bool, Bool) -> m ()
-                -- | Pressed -> (Focused, input) -> Pressed'
-              , btnParse :: Bool -> (Bool, UIInput) -> Bool
-                -- | Input -> (Focused, Pressed) -> Input'
-              , btnStream :: UIInput -> (Bool, Bool) -> UIInput
-              }
+-- -- | A Label is a 'Component' which renders a 'String'
+-- newtype Label m = Label {
+--     lblRender :: Monad m => String -> m ()
+--     }
+--
+-- -- | Create a 'Component' from a 'Label'
+-- mkLbl :: Monad m => Label m -> Component s m String ()
+-- mkLbl l =
+--   let renderer = lblRender l
+--    in Component $ second $ mkKleisli_ renderer
 
--- | Create a 'Component' from a 'Button'
-mkBtn :: Monad m => Button m -> Component s m (String, Bool) Bool
-mkBtn b =
-    let renderer = btnRender b
-        parser = btnParse b
-        stream = btnStream b
-    in Component $ proc (input, (lbl, focused)) -> do
-        pressed <- mkSW_ False parser -< (focused, input)
-        input' <- arr (uncurry stream) -< (input, (focused, pressed))
-        mkKleisli_ (uncurry renderer) -< (lbl, (focused, pressed))
-        returnA -< (input', pressed)
+-- {-| A Button is a stateful 'Component' which renders a label, checks
+--  - whether it is focused, and outputs a 'Bool' indicating whether it is
+--  - currently pressed
+--
+--  * Input: (Label, Focused)
+--  * Output: (IsPressed)
+--  -}
+-- data Button m = Button
+--               {
+--                 -- | Label -> (Focused, Pressed) -> Render
+--                 btnRender :: Monad m => String -> (Bool, Bool) -> m ()
+--                 -- | Pressed -> (Focused, input) -> Pressed'
+--               , btnParse :: Bool -> (Bool, UIInput) -> Bool
+--                 -- | Input -> (Focused, Pressed) -> Input'
+--               , btnStream :: UIInput -> (Bool, Bool) -> UIInput
+--               }
+--
+-- -- | Create a 'Component' from a 'Button'
+-- mkBtn :: Monad m => Button m -> Component s m (String, Bool) Bool
+-- mkBtn b =
+--     let renderer = btnRender b
+--         parser = btnParse b
+--         stream = btnStream b
+--     in Component $ proc (input, (lbl, focused)) -> do
+--         pressed <- mkSW_ False parser -< (focused, input)
+--         input' <- arr (uncurry stream) -< (input, (focused, pressed))
+--         mkKleisli_ (uncurry renderer) -< (lbl, (focused, pressed))
+--         returnA -< (input', pressed)
 
 --{-| A TextField is a 'Component' which changes contents according to an
 -- - input string, updates according to UI input when this input is
