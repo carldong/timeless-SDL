@@ -20,7 +20,7 @@ import FRP.Timeless.Framework.UI.Events
 import FRP.Timeless.Framework.SDL.Components
 
 import qualified SDL as SDL
-import qualified Graphics.UI.SDL.TTF as TTF
+import qualified SDL.TTF as TTF
 import SDL (($=))
 import Linear
 

@@ -18,8 +18,8 @@ import Linear.Affine (Point(..))
 
 import qualified SDL as SDL
 import SDL.Raw.Types (Color(..))
-import qualified Graphics.UI.SDL.TTF as TTF
-import Graphics.UI.SDL.TTF.FFI (TTFFont)
+import qualified SDL.TTF as TTF
+import SDL.TTF.FFI (TTFFont)
 import SDL (($=))
 
 data SDLUIConfig = SDLUIConfig {
