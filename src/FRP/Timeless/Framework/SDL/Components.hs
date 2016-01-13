@@ -31,7 +31,7 @@ data SDLUIConfig = SDLUIConfig {
 {-| This function is the renderer of an SDL2 Software rendered label.
  - It draws on the SDL surface with upper-left corner specified.
  -
- - @TODO: Somehow TTF is initialized but not passes the `wasInit`. Will fix it
+ - TODO: wasInit does not work yet. Need to fix
  -}
 sdlLabelRendererSW :: (MonadIO m) => SDLUIConfig
                    -> SDL.Surface -- ^ The surface to draw on
@@ -40,7 +40,7 @@ sdlLabelRendererSW :: (MonadIO m) => SDLUIConfig
 sdlLabelRendererSW config master (LabelInput txt pos) = liftIO $ do
   -- config <- ask
   inited <- TTF.wasInit
-  -- if not inited then error "Font system not initialized! " else return ()
+  if not inited then error "FRP.Timeless.Framework.SDL.Components.sdlLabelRendererSW: Font system not initialized! " else return ()
   -- v Testing, White
   surf' <- TTF.renderUTF8Solid (labelFont config) txt (Color 255 255 255 255)
   SDL.surfaceBlit surf' Nothing master (Just $ P $ toCInt <$> pos)

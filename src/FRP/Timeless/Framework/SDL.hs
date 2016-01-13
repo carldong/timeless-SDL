@@ -59,7 +59,7 @@ loadTest :: IO TestAPP
 loadTest = do
   let imgName = "test/test.bmp"
   surf <- SDL.loadBMP imgName
-  let fontSize = 12
+  let fontSize = 36
       fontFF = 0
   font <- TTF.openFont "test/DejaVuSans.ttf" fontSize
   let uiconfig = SDLUIConfig font fontSize fontFF
@@ -74,7 +74,7 @@ initApp = do
   -- SDL.rendererDrawBlendMode renderer $= SDL.BlendAlphaBlend
   success <- TTF.init
   inited <- TTF.wasInit
-  --if success /= 0 || not inited then error "TTF init failed" else return ()
+  if success /= 0 || not inited then error "TTF init failed" else return ()
 
   app <- loadTest
   return $ testFWBox app master window
