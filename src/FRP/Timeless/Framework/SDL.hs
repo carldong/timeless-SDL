@@ -67,14 +67,15 @@ loadTest = do
 
 initApp :: IO (Signal s IO () ())
 initApp = do
-  SDL.initialize [SDL.InitEverything]
+  --SDL.initialize [SDL.InitEverything]
+  SDL.initializeAll
   window <- SDL.createWindow "SDL Framework" SDL.defaultWindow
   --renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
   master <- SDL.getWindowSurface window
   -- SDL.rendererDrawBlendMode renderer $= SDL.BlendAlphaBlend
-  success <- TTF.init
+  --success <- TTF.init
   inited <- TTF.wasInit
-  if success /= 0 || not inited then error "TTF init failed" else return ()
+  if not inited then error "TTF init failed" else return ()
 
   app <- loadTest
   return $ testFWBox app master window
