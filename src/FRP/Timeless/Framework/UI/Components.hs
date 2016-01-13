@@ -60,20 +60,29 @@ type Image m a = Renderable m (ImgInput a)
 -- | The 'Image' 'Component'
 type ImageComponent s m a = Component s m (ImgInput a) ()
 
+-- | Create a 'Renderable' 'Component' for a framework
+mkRenderable :: Monad m => Renderable m a -> Component s m a ()
+mkRenderable rdr = Component $ second . mkKleisli_ $ execRenderable rdr
+
 -- | Creates an 'Image' 'Component' for a framework
 mkImgC :: (Monad m) => Image m a -> ImageComponent s m a
-mkImgC img = Component $ second . mkKleisli_ $ execRenderable img
+mkImgC = mkRenderable
 
--- -- | A Label is a 'Component' which renders a 'String'
+-- | The data structure for a label
+data LabelInput = LabelInput {
+    lblString :: String
+  , lblPos :: V2 Integer
+  }
+
+-- | A Label is a 'Component' which renders a 'String'
 -- newtype Label m = Label {
---     lblRender :: Monad m => String -> m ()
+--     lblRender :: Monad m => LabelInput -> m ()
 --     }
---
--- -- | Create a 'Component' from a 'Label'
--- mkLbl :: Monad m => Label m -> Component s m String ()
--- mkLbl l =
---   let renderer = lblRender l
---    in Component $ second $ mkKleisli_ renderer
+type Label m = Renderable m LabelInput
+
+-- | Create a 'Label' 'Component' for a framework
+mkLbl :: Monad m => Label m -> Component s m LabelInput ()
+mkLbl = mkRenderable
 
 -- {-| A Button is a stateful 'Component' which renders a label, checks
 --  - whether it is focused, and outputs a 'Bool' indicating whether it is
