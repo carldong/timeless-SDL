@@ -32,20 +32,21 @@ data SDLUIConfig = SDLUIConfig {
  - It draws on the SDL surface with upper-left corner specified. The
  - 'Reader' monad here is used to read font configurations
  -}
--- sdlLabelRendererSW :: forall r m. (MonadIO m) => V2 Int
---                    -> SDL.Surface -- ^ The surface to draw on
---                    -> String -- ^ Label
---                    -> ReaderT SDLUIConfig m ()
--- sdlLabelRendererSW vPos surf lbl = do
---   config <- ask
---   inited <- liftIO TTF.wasInit
---   if not inited
---      then liftIO . putBug $ "Font system not initialized! "
---      else liftIO $ do
---        -- v Testing, White
---        surf' <- TTF.renderUTF8Solid (labelFont config) lbl (Color 255 255 255 255)
---        SDL.surfaceBlit surf' Nothing surf (Just $ pure $ toCInt vPos)
---
+sdlLabelRendererSW :: forall r m. (MonadIO m) => SDLUIConfig
+                   -> V2 Int
+                   -> SDL.Surface -- ^ The surface to draw on
+                   -> String -- ^ Label
+                   -> m ()
+sdlLabelRendererSW config vPos surf lbl = liftIO $ do
+  -- config <- ask
+  inited <- TTF.wasInit
+  if not inited
+     then putBug $ "Font system not initialized! "
+     else do
+       -- v Testing, White
+       surf' <- TTF.renderUTF8Solid (labelFont config) lbl (Color 255 255 255 255)
+       SDL.surfaceBlit surf' Nothing surf (Just $ P $ toCInt <$> vPos)
+
 
 {-| This function renders an image onto the given surface as is.
 -}
@@ -55,8 +56,10 @@ sdlImageRendererSW :: (MonadIO m) => SDL.Surface
 sdlImageRendererSW dest img = liftIO $ do
   let src = imgData img
       pos = P $ imgPos img
-  SDL.surfaceBlit src Nothing dest (Just $ toCInt pos)
+  SDL.surfaceBlit src Nothing dest (Just $ toCInt <$> pos)
 
+{-| This function creates an Image component
+-}
+sdlImageComp_SW :: MonadIO m => SDL.Surface -> ImageComponent s m SDL.Surface
+sdlImageComp_SW master = mkImgC $ Renderable $ sdlImageRendererSW master
 
-sdlImageC_SW :: MonadIO m => SDL.Surface -> ImageComponent s m SDL.Surface
-sdlImageC_SW master = mkImgC $ Renderable $ sdlImageRendererSW master

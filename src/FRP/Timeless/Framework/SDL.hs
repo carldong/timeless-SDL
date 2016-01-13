@@ -38,7 +38,7 @@ sUpdateWindow window = proc a -> do
 
 sTestContainer :: ImgInput SDL.Surface -> SDL.Surface -> Container IO
 sTestContainer img master = Container $ proc input -> do
-  componentBox $ sdlImageC_SW master -< (input, img)
+  componentBox $ sdlImageComp_SW master -< (input, img)
   returnA -< input
 
 -- | Currently displays an image at (0,0)
