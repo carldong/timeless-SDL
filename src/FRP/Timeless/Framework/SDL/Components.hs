@@ -28,24 +28,32 @@ data SDLUIConfig = SDLUIConfig {
   , labelFontFF :: Int -- ^ Font face index
   }
 
-{-| This function is the renderer of an SDL2 Software rendered button.
- - It draws on the SDL surface with upper-left corner specified. The
- - 'Reader' monad here is used to read font configurations
+{-| This function is the renderer of an SDL2 Software rendered label.
+ - It draws on the SDL surface with upper-left corner specified.
+ -
+ - @TODO: Somehow TTF is initialized but not passes the `wasInit`. Will fix it
  -}
-sdlLabelRendererSW :: forall r m. (MonadIO m) => SDLUIConfig
-                   -> V2 Int
+sdlLabelRendererSW :: (MonadIO m) => SDLUIConfig
                    -> SDL.Surface -- ^ The surface to draw on
-                   -> String -- ^ Label
+                   -> LabelInput
                    -> m ()
-sdlLabelRendererSW config vPos surf lbl = liftIO $ do
+sdlLabelRendererSW config master (LabelInput txt pos) = liftIO $ do
   -- config <- ask
   inited <- TTF.wasInit
-  if not inited
-     then putBug $ "Font system not initialized! "
-     else do
-       -- v Testing, White
-       surf' <- TTF.renderUTF8Solid (labelFont config) lbl (Color 255 255 255 255)
-       SDL.surfaceBlit surf' Nothing surf (Just $ P $ toCInt <$> vPos)
+  -- if not inited then error "Font system not initialized! " else return ()
+  -- v Testing, White
+  surf' <- TTF.renderUTF8Solid (labelFont config) txt (Color 255 255 255 255)
+  SDL.surfaceBlit surf' Nothing master (Just $ P $ toCInt <$> pos)
+  SDL.freeSurface surf'
+
+{-| This function creates a Label component
+-}
+sdlLabelComp_SW
+  :: MonadIO m => SDLUIConfig
+  -> SDL.Surface
+  -> LabelComponent s m
+sdlLabelComp_SW config master =
+  mkLblComp $ Renderable $ sdlLabelRendererSW config master
 
 
 {-| This function renders an image onto the given surface as is.
@@ -61,5 +69,5 @@ sdlImageRendererSW dest img = liftIO $ do
 {-| This function creates an Image component
 -}
 sdlImageComp_SW :: MonadIO m => SDL.Surface -> ImageComponent s m SDL.Surface
-sdlImageComp_SW master = mkImgC $ Renderable $ sdlImageRendererSW master
+sdlImageComp_SW master = mkImgComp $ Renderable $ sdlImageRendererSW master
 

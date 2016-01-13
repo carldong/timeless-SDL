@@ -65,8 +65,8 @@ mkRenderable :: Monad m => Renderable m a -> Component s m a ()
 mkRenderable rdr = Component $ second . mkKleisli_ $ execRenderable rdr
 
 -- | Creates an 'Image' 'Component' for a framework
-mkImgC :: (Monad m) => Image m a -> ImageComponent s m a
-mkImgC = mkRenderable
+mkImgComp :: (Monad m) => Image m a -> ImageComponent s m a
+mkImgComp = mkRenderable
 
 -- | The data structure for a label
 data LabelInput = LabelInput {
@@ -80,9 +80,11 @@ data LabelInput = LabelInput {
 --     }
 type Label m = Renderable m LabelInput
 
+type LabelComponent s m = Component s m LabelInput ()
+
 -- | Create a 'Label' 'Component' for a framework
-mkLbl :: Monad m => Label m -> Component s m LabelInput ()
-mkLbl = mkRenderable
+mkLblComp :: Monad m => Label m -> Component s m LabelInput ()
+mkLblComp = mkRenderable
 
 -- {-| A Button is a stateful 'Component' which renders a label, checks
 --  - whether it is focused, and outputs a 'Bool' indicating whether it is

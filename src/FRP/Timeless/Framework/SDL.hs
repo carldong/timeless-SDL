@@ -26,6 +26,7 @@ import Linear
 
 data TestAPP = TestAPP {
   testImg :: ImgInput SDL.Surface
+  , testUI :: SDLUIConfig
   }
 
 fwSession = clockSession_
@@ -36,22 +37,33 @@ sUpdateWindow window = proc a -> do
   mkActM (SDL.updateWindowSurface window) -< ()
   returnA -< a
 
-sTestContainer :: ImgInput SDL.Surface -> SDL.Surface -> Container IO
-sTestContainer img master = Container $ proc input -> do
-  componentBox $ sdlImageComp_SW master -< (input, img)
-  returnA -< input
+testLabel :: LabelInput
+testLabel = LabelInput "Hello World" (V2 0 100)
 
--- | Currently displays an image at (0,0)
+sTestContainer :: SDLUIConfig -> ImgInput SDL.Surface -> SDL.Surface -> Container IO
+sTestContainer uiconfig img master = Container $ proc input -> do
+  (i',_) <- componentBox $ sdlImageComp_SW master -< (input, img)
+  (i'',_) <- componentBox $ cTestLabel -< (i', testLabel)
+  returnA -< i''
+    where
+      cTestLabel :: LabelComponent s IO
+      cTestLabel = sdlLabelComp_SW uiconfig master
+
+-- | Currently displays an image at (0,0), and a text label at (0, 100)
 testFWBox :: TestAPP -> SDL.Surface -> SDL.Window -> Signal s IO () ()
 testFWBox app master window = proc _ -> do
-  sUpdateWindow window <<< containerBox (sTestContainer (testImg app) master) -< UIInput
+  sUpdateWindow window <<< containerBox (sTestContainer (testUI app) (testImg app) master) -< UIInput
   returnA -< ()
 
 loadTest :: IO TestAPP
 loadTest = do
   let imgName = "test/test.bmp"
   surf <- SDL.loadBMP imgName
-  return $ TestAPP $ ImgInput surf (V2 0 0)
+  let fontSize = 12
+      fontFF = 0
+  font <- TTF.openFont "test/DejaVuSans.ttf" fontSize
+  let uiconfig = SDLUIConfig font fontSize fontFF
+  return $ TestAPP (ImgInput surf (V2 0 0)) (uiconfig)
 
 initApp :: IO (Signal s IO () ())
 initApp = do
@@ -60,6 +72,9 @@ initApp = do
   --renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
   master <- SDL.getWindowSurface window
   -- SDL.rendererDrawBlendMode renderer $= SDL.BlendAlphaBlend
+  success <- TTF.init
+  inited <- TTF.wasInit
+  --if success /= 0 || not inited then error "TTF init failed" else return ()
 
   app <- loadTest
   return $ testFWBox app master window
