@@ -84,4 +84,3 @@ testApp :: IO ()
 testApp = TTF.withInit $ do
   box <- initApp
   runBox fwSession box
-
