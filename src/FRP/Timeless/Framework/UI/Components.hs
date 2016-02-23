@@ -86,6 +86,10 @@ type LabelComponent s m = Component s m LabelInput ()
 mkLblComp :: Monad m => Label m -> Component s m LabelInput ()
 mkLblComp = mkRenderable
 
+{-
+  TODO: Test this: Make the button with a "label" arrow and a logic arrow.
+-}
+
 -- {-| A Button is a stateful 'Component' which renders a label, checks
 --  - whether it is focused, and outputs a 'Bool' indicating whether it is
 --  - currently pressed
