@@ -90,6 +90,28 @@ mkLblComp = mkRenderable
   TODO: Test this: Make the button with a "label" arrow and a logic arrow.
 -}
 
+-- | Button input includes a string of label and the focus
+type ButtonInput = (String, Bool)
+-- | Retrieve label from button input
+btnLabel :: ButtonInput -> String
+btnLabel = fst
+-- | Retrieve focus status from button input
+btnFocus :: ButtonInput -> Bool
+btnFocus = snd
+
+-- | Button output is whether it is pressed
+type ButtonOutput = Bool
+
+{-| A Button is a stateful 'Component' which renders a label, checks
+ - whether it is focused, and outputs a 'Bool' indicating whether it is
+ - currently pressed
+
+ * Input: (Label, Focused)
+ * Output: (IsPressed)
+ -}
+mkButton :: (Monad m) => Maybe String -> Component s m ButtonInput ButtonOutput
+mkButton mLbl = undefined
+
 -- {-| A Button is a stateful 'Component' which renders a label, checks
 --  - whether it is focused, and outputs a 'Bool' indicating whether it is
 --  - currently pressed
