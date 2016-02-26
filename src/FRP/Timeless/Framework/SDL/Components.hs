@@ -53,7 +53,7 @@ sdlLabelComp_SW
   -> SDL.Surface
   -> LabelComponent s m
 sdlLabelComp_SW config master =
-  mkLblComp $ Renderable $ sdlLabelRendererSW config master
+  mkFWLblComp $ Renderable $ sdlLabelRendererSW config master
 
 
 {-| This function renders an image onto the given surface as is.
@@ -69,5 +69,5 @@ sdlImageRendererSW dest img = liftIO $ do
 {-| This function creates an Image component
 -}
 sdlImageComp_SW :: MonadIO m => SDL.Surface -> ImageComponent s m SDL.Surface
-sdlImageComp_SW master = mkImgComp $ Renderable $ sdlImageRendererSW master
+sdlImageComp_SW master = mkFWImgComp $ Renderable $ sdlImageRendererSW master
 
