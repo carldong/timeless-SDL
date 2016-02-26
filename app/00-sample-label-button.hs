@@ -6,8 +6,10 @@ import FRP.Timeless.Framework.SDL
 import qualified SDL as SDL
 import qualified SDL.TTF as TTF
 import SDL (($=))
-import Linear
+import Linear hiding(trace)
 import Control.Monad.IO.Class
+
+import Debug.Trace
 
 data TestAPP = TestAPP {
   testImg :: ImgInput SDL.Surface
@@ -42,8 +44,10 @@ sTestContainer uiconfig img master = Container $ proc input -> do
 -- | Currently displays an image at (0,0), and a text label at (0, 100)
 testFWBox :: TestAPP -> SDL.Surface -> SDL.Window -> Signal s IO () ()
 testFWBox app master window = proc _ -> do
+  evs <- mkActM SDL.pollEvents -< ()
+  quit <- iswitch () <<< arr (any (\(SDL.Event _ e) -> e == SDL.QuitEvent)) -< evs
   sUpdateWindow window <<< containerBox (sTestContainer (testUI app) (testImg app) master) -< UIInput
-  returnA -< ()
+  returnA -< quit
 
 loadTest :: IO TestAPP
 loadTest = do
